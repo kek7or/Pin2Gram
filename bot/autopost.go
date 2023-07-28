@@ -49,14 +49,12 @@ func (b *PinBot) runAutopost(ctx context.Context) error {
 			return fmt.Errorf("failed to get posts from database")
 		}
 
-		rand.Seed(time.Now().Unix())
 		pinsToPost := NonImplicationPins(pins, posts)
 
 		if len(pinsToPost) == 0 {
 			continue
 		}
-
-		randomPin := pinsToPost[rand.Intn(len(pinsToPost))]
+		randomPin := pinsToPost[rand.Int63n(int64(len(pinsToPost)))]
 
 		photo := tgbotapi.NewPhoto(channel.ChannelId, tgbotapi.FileURL(randomPin.Images.I564x.URL))
 		sentMsg, err := b.api.Send(photo)
