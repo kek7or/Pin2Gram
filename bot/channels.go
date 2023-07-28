@@ -217,6 +217,46 @@ func (b *PinBot) ViewCmdAddChannel() ViewFunc {
 	}
 }
 
+func (b *PinBot) ViewCmdRemoveChannels() ViewFunc {
+	return func(ctx context.Context, api *tgbotapi.BotAPI, update tgbotapi.Update) error {
+		args := strings.Split(update.Message.CommandArguments(), " ")
+
+		if !AreAddChannelArgsValid(args) {
+			b.AnswerMsg(update, "unable to parse arguments")
+			return nil
+		}
+
+		channels := make([]int64, 0)
+		for _, arg := range args {
+			channelId, err := strconv.ParseInt(arg, 10, 64)
+			if err != nil {
+				b.AnswerMsg(update, "failed to convert channelId to integer")
+				return nil
+			}
+
+			channels = append(channels, channelId)
+		}
+
+		collChannels := b.db.Collection(CHANNELS_COLLECTION)
+		_, err := collChannels.DeleteMany(ctx, bson.M{"channelId": bson.M{"$in": channels}})
+		if err != nil {
+			b.AnswerMsg(update, "failed to remove channels from database")
+			return nil
+		}
+
+		collPosts := b.db.Collection(POSTS_COLLECTION)
+		_, err = collPosts.DeleteMany(ctx, bson.M{"channelId": bson.M{"$in": channels}})
+		if err != nil {
+			b.AnswerMsg(update, "failed to remove posts from database")
+			return nil
+		}
+
+		b.AnswerMsg(update, "channels and posts has been successfully remove to database")
+
+		return nil
+	}
+}
+
 func handleBoards(boards []string) ([]string, error) {
 	validBoards := 0
 
