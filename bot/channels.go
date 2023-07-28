@@ -8,12 +8,104 @@ import (
 	"strconv"
 	"strings"
 
+	"pinterest-tg-autopost/dbtypes"
 	"pinterest-tg-autopost/pinterest"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+func (b *PinBot) ViewCmdAddBoards() ViewFunc {
+	return func(ctx context.Context, api *tgbotapi.BotAPI, update tgbotapi.Update) error {
+		args := strings.Split(update.Message.CommandArguments(), " ")
+
+		if !AreAddChannelArgsValid(args) {
+			b.AnswerMsg(update, "unable to parse arguments")
+			return nil
+		}
+
+		channelId, err := strconv.ParseInt(args[0], 10, 64)
+		if err != nil {
+			b.AnswerMsg(update, "failed to convert channelId to integer")
+			return nil
+		}
+
+		coll := b.db.Collection(CHANNELS_COLLECTION)
+
+		var channel dbtypes.Channel
+		filter := bson.M{"channelId": channelId}
+
+		res := coll.FindOne(ctx, filter)
+		if res.Err() == mongo.ErrNoDocuments {
+			b.AnswerMsg(update, "'%d' does not exist in database", channelId)
+			return nil
+		}
+
+		if err := res.Decode(&channel); err != nil {
+			b.AnswerMsg(update, "failed to decode channel")
+			return nil
+		}
+
+		toInsert := make([]interface{}, 0)
+
+		userBoards := args[1:]
+		userBoards, err = handleBoards(userBoards)
+		if err != nil {
+			b.AnswerMsg(update, err.Error())
+		}
+
+		for _, userBoard := range userBoards {
+			for _, dboard := range channel.Boards {
+				if userBoard == dboard {
+					b.AnswerMsg(update, "board '%s' already exists in database", userBoard)
+				} else {
+					toInsert = append(toInsert, userBoard)
+				}
+			}
+		}
+
+		if len(toInsert) == 0 {
+			b.AnswerMsg(update, "no boards to add")
+			return nil
+		}
+
+		updatedBoards := bson.D{{"$push", bson.D{{"boards", bson.D{{"$each", toInsert}}}}}}
+		coll.UpdateOne(ctx, filter, updatedBoards)
+
+		b.AnswerMsg(update, "boards has been successfully updated")
+
+		return nil
+	}
+}
+
+func (b *PinBot) ViewCmdChannels() ViewFunc {
+	return func(ctx context.Context, api *tgbotapi.BotAPI, update tgbotapi.Update) error {
+		coll := b.db.Collection(CHANNELS_COLLECTION)
+
+		cur, err := coll.Find(ctx, bson.M{})
+		if err != nil {
+			b.AnswerMsg(update, "failed to get channels from database")
+			return nil
+		}
+
+		var channels []dbtypes.Channel
+		if err := cur.All(ctx, &channels); err != nil {
+			b.AnswerMsg(update, "failed to get channels from database")
+			return nil
+		}
+
+		text := ""
+
+		for _, c := range channels {
+			text += fmt.Sprintf("%v\n", c)
+		}
+
+		b.AnswerMsg(update, text)
+
+		return nil
+	}
+}
 
 func (b *PinBot) ViewCmdAddChannel() ViewFunc {
 	return func(ctx context.Context, api *tgbotapi.BotAPI, update tgbotapi.Update) error {

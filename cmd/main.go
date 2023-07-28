@@ -31,6 +31,8 @@ func main() {
 	pinbot := bot.NewPinBot(api, db)
 
 	pinbot.RegisterCmdView("addChannel", pinbot.ViewCmdAddChannel(), false)
+	pinbot.RegisterCmdView("channels", pinbot.ViewCmdChannels(), false)
+	pinbot.RegisterCmdView("addBoards", pinbot.ViewCmdAddBoards(), false)
 
 	pinbot.Run(context.TODO())
 }
