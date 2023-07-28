@@ -10,6 +10,7 @@ TODO
 
 # Commands
 - `/addChannel CHANNEL_ID BOARD1 BOARD2 ...`
+- `/removeChannels CHANNEL_ID1 CHANNEL_ID2 ...`
 - `/channels`
 - `/addBoards CHANNEL_ID BOARD1 BOARD2 ...`
 - `/removeBoards CHANNEL_ID BOARD1 BOARD2 ...`
