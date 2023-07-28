@@ -33,6 +33,7 @@ func main() {
 	pinbot.RegisterCmdView("addChannel", pinbot.ViewCmdAddChannel(), false)
 	pinbot.RegisterCmdView("channels", pinbot.ViewCmdChannels(), false)
 	pinbot.RegisterCmdView("addBoards", pinbot.ViewCmdAddBoards(), false)
+	pinbot.RegisterCmdView("removeBoards", pinbot.ViewCmdRemoveBoards(), false)
 
 	pinbot.Run(context.TODO())
 }
