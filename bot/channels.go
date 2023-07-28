@@ -2,9 +2,7 @@ package bot
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -226,20 +224,9 @@ func handleBoards(boards []string) ([]string, error) {
 	boards = RemoveDuplicate(boards)
 
 	for _, board := range boards {
-		uri := fmt.Sprintf(PIDGETS_URI, board)
-		resp, err := http.Get(uri)
+		_, err := pinterest.GetPinsFromBoard(board)
 		if err != nil {
-			return nil, fmt.Errorf("failed to access '%s' board", board)
-		}
-		defer resp.Body.Close()
-
-		var decoded pinterest.GetApiResponse
-		if err := json.NewDecoder(resp.Body).Decode(&decoded); err != nil {
-			return nil, fmt.Errorf("failed to decode '%s' board info to json", board)
-		}
-
-		if decoded.Status != "success" {
-			return nil, fmt.Errorf("failed to get info about '%s' board", board)
+			return nil, err
 		}
 
 		validBoards++

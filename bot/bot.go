@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"sync"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -53,6 +54,8 @@ func NewPinBot(api *tgbotapi.BotAPI, db *mongo.Database) *PinBot {
 }
 
 func (b *PinBot) Run(ctx context.Context) error {
+	go b.RunFetchPost(ctx)
+
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = UPDATE_TIMEOUT
 	updates := b.api.GetUpdatesChan(u)
@@ -67,10 +70,32 @@ func (b *PinBot) Run(ctx context.Context) error {
 	}
 }
 
+func (b *PinBot) RunFetchPost(ctx context.Context) error {
+	ticker := time.NewTicker(20 * time.Second) // TODO
+
+	for {
+		select {
+		case <-ticker.C:
+			err := b.runAutopost(ctx)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+}
+
 func (b *PinBot) AnswerMsg(update tgbotapi.Update, format string, args ...any) {
 	text := fmt.Sprintf(format, args...)
 
 	if _, err := b.api.Send(tgbotapi.NewMessage(update.Message.Chat.ID, text)); err != nil {
+		log.Printf("failed to send error message: %v", err)
+	}
+}
+
+func (b *PinBot) SendMsg(id int64, format string, args ...any) {
+	text := fmt.Sprintf(format, args...)
+
+	if _, err := b.api.Send(tgbotapi.NewMessage(id, text)); err != nil {
 		log.Printf("failed to send error message: %v", err)
 	}
 }
