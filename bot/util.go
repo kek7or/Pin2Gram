@@ -44,10 +44,15 @@ func NonImplicationPins(sliceA []pinterest.Pin, sliceB []dbtypes.Post) []pintere
 	newSlice := make([]pinterest.Pin, 0)
 
 	for _, a := range sliceA {
+		isAinB := false
 		for _, b := range sliceB {
-			if a.ID != b.PinId && !InSlicePin(a, newSlice) {
-				newSlice = append(newSlice, a)
+			if a.ID == b.PinId {
+				isAinB = true
 			}
+		}
+
+		if !isAinB {
+			newSlice = append(newSlice, a)
 		}
 	}
 

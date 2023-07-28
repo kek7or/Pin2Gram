@@ -48,8 +48,8 @@ type Pin struct {
 }
 
 type Images struct {
-	_237x Image `json:"237x"`
-	_564x Image `json:"564x"`
+	I237x Image `json:"237x"`
+	I564x Image `json:"564x"`
 }
 
 type Image struct {

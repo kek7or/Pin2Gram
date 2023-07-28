@@ -38,7 +38,7 @@ func (b *PinBot) runAutopost(ctx context.Context) error {
 			pins = append(pins, pins_...)
 		}
 
-		filter := bson.M{"channelId": channel}
+		filter := bson.M{"channelId": channel.ChannelId}
 		cur, err := postsColl.Find(ctx, filter)
 		if err != nil {
 			return fmt.Errorf("failed to find posts from database")
@@ -51,6 +51,11 @@ func (b *PinBot) runAutopost(ctx context.Context) error {
 
 		rand.Seed(time.Now().Unix())
 		pinsToPost := NonImplicationPins(pins, posts)
+
+		if len(pinsToPost) == 0 {
+			continue
+		}
+
 		randomPin := pinsToPost[rand.Intn(len(pinsToPost))]
 
 		photo := tgbotapi.NewPhoto(channel.ChannelId, tgbotapi.FileURL(randomPin.Images.I564x.URL))
