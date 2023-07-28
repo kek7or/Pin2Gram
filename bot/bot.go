@@ -71,7 +71,7 @@ func (b *PinBot) Run(ctx context.Context) error {
 }
 
 func (b *PinBot) RunFetchPost(ctx context.Context) error {
-	ticker := time.NewTicker(20 * time.Second) // TODO
+	ticker := time.NewTicker(POST_TIMEOUT * time.Second)
 
 	for {
 		select {

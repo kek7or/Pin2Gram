@@ -1,7 +1,8 @@
 package bot
 
 const (
-	UPDATE_TIMEOUT = 60
+	UPDATE_TIMEOUT = 60 // s
+	POST_TIMEOUT   = 60 // s
 )
 
 const (
