@@ -53,9 +53,8 @@ func (b *PinBot) runAutopost(ctx context.Context) error {
 		pinsToPost := NonImplicationPins(pins, posts)
 		randomPin := pinsToPost[rand.Intn(len(pinsToPost))]
 
-		text := fmt.Sprintf("%v", randomPin.ID)
-		msg := tgbotapi.NewMessage(channel.ChannelId, text)
-		sentMsg, err := b.api.Send(msg)
+		photo := tgbotapi.NewPhoto(channel.ChannelId, tgbotapi.FileURL(randomPin.Images.I564x.URL))
+		sentMsg, err := b.api.Send(photo)
 		if err != nil {
 			return fmt.Errorf("failed to send error message: %v", err)
 		}
