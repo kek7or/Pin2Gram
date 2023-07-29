@@ -51,6 +51,7 @@ func (b *PinBot) ViewCmdAddBoards() ViewFunc {
 		userBoards, err = handleBoards(userBoards)
 		if err != nil {
 			b.AnswerMsg(update, err.Error())
+			return nil
 		}
 
 		for _, userBoard := range userBoards {
@@ -117,6 +118,7 @@ func (b *PinBot) ViewCmdRemoveBoards() ViewFunc {
 		userBoards, err = handleBoards(userBoards)
 		if err != nil {
 			b.AnswerMsg(update, err.Error())
+			return nil
 		}
 
 		for _, userBoard := range userBoards {
@@ -199,6 +201,7 @@ func (b *PinBot) ViewCmdAddChannel() ViewFunc {
 		boards, err = handleBoards(boards)
 		if err != nil {
 			b.AnswerMsg(update, err.Error())
+			return nil
 		}
 
 		if hasPostAccess := b.hasPostAccess(channelId); !hasPostAccess {
